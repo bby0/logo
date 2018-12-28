@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.qfedu.logo.mapper.ShopcarMapper">
+    <resultMap id="BaseResultMap" type="com.qfedu.logo.pojo.Shopcar">
+        <id column="shopcar_id" property="shopcarId" jdbcType="INTEGER"/>
+        <result column="user_id" property="userId" jdbcType="INTEGER"/>
+        <result column="goods_id" property="goodsId" jdbcType="INTEGER"/>
+        <result column="goods_num" property="goodsNum" jdbcType="INTEGER"/>
+        <result column="state" property="state" jdbcType="INTEGER"/>
+
+
+    </resultMap>
+
+
+    <!--自定义的返回类型-->
+    <resultMap id="myMap" type="com.qfedu.logo.pojo.Shopcar" extends="BaseResultMap">
+        <result column="sumPrice" property="sumPrice" javaType="INTEGER"/>
+        <association property="goods" javaType="com.qfedu.logo.pojo.Goods">
+            <id column="gid" property="gid" jdbcType="INTEGER"/>
+            <result column="gname" property="gname" jdbcType="VARCHAR"/>
+            <result column="price" property="price" jdbcType="VARCHAR"/>
+            <result column="descs" property="descs" jdbcType="VARCHAR"/>
+            <result column="typeid" property="typeid" jdbcType="INTEGER"/>
+        </association>
+
+        <collection property="imgs" ofType="com.qfedu.logo.pojo.Img">
+            <id column="id" property="id" jdbcType="INTEGER"/>
+            <result column="imgurl" property="imgurl" jdbcType="VARCHAR"/>
+            <result column="goodsid" property="goodsid" jdbcType="INTEGER"/>
+        </collection>
+    </resultMap>
+
+
+    <sql id="Base_Column_List">
+    shopcar_id, user_id, goods_id, goods_num, state
+  </sql>
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer">
+        select
+        <include refid="Base_Column_List"/>
+        from shopcar
+        where shopcar_id = #{shopcarId,jdbcType=INTEGER}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from shopcar
+    where shopcar_id = #{shopcarId,jdbcType=INTEGER}
+  </delete>
+    <insert id="insert" parameterType="com.qfedu.logo.pojo.Shopcar">
+    insert into shopcar (shopcar_id, user_id, goods_id, 
+      goods_num, state)
+    values (#{shopcarId,jdbcType=INTEGER}, #{userId,jdbcType=INTEGER}, #{goodsId,jdbcType=INTEGER}, 
+      #{goodsNum,jdbcType=INTEGER}, #{state,jdbcType=INTEGER})
+  </insert>
+    <insert id="insertSelective" parameterType="com.qfedu.logo.pojo.Shopcar">
+        insert into shopcar
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="shopcarId != null">
+                shopcar_id,
+            </if>
+            <if test="userId != null">
+                user_id,
+            </if>
+            <if test="goodsId != null">
+                goods_id,
+            </if>
+            <if test="goodsNum != null">
+                goods_num,
+            </if>
+            <if test="state == null">
+                state,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="shopcarId != null">
+                #{shopcarId,jdbcType=INTEGER},
+            </if>
+            <if test="userId != null">
+                #{userId,jdbcType=INTEGER},
+            </if>
+            <if test="goodsId != null">
+                #{goodsId,jdbcType=INTEGER},
+            </if>
+            <if test="goodsNum != null">
+                #{goodsNum,jdbcType=INTEGER},
+            </if>
+            <if test="state == null">
+                0,
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.qfedu.logo.pojo.Shopcar">
+        update shopcar
+        <set>
+            <if test="userId != null">
+                user_id = #{userId,jdbcType=INTEGER},
+            </if>
+            <if test="goodsId != null">
+                goods_id = #{goodsId,jdbcType=INTEGER},
+            </if>
+            <if test="goodsNum != null">
+                goods_num = #{goodsNum,jdbcType=INTEGER},
+            </if>
+            <if test="state != null">
+                state = #{state,jdbcType=INTEGER},
+            </if>
+        </set>
+        where shopcar_id = #{shopcarId,jdbcType=INTEGER}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.qfedu.logo.pojo.Shopcar">
+    update shopcar
+    set
+      goods_num = #{goodsNum,jdbcType=INTEGER}
+
+    where shopcar_id = #{shopcarId,jdbcType=INTEGER}
+  </update>
+
+
+    <!--根据商品的id查询商品的信息,仅仅查询未下单的数据-->
+    <select id="selectByGoodsId" resultMap="myMap" parameterType="java.lang.Integer">
+          SELECT shopcar.*, goods.gid, goods.gname, goods.price, goods.descs, img.imgurl
+          from goods
+          LEFT OUTER JOIN shopcar
+          on shopcar.goods_id = goods.gid
+          LEFT OUTER JOIN img
+          ON goods.gid = img.goodsid
+          WHERE goods.gid = #{goodsId} and shopcar.state = 0 and shopcar.user_id= #{userId}
+      </select>
+
+    <!--根据用户的id查找加入的购物车-->
+    <select id="selectByGoodsId1" resultMap="myMap">
+       SELECT shopcar.*, goods.*, img.id, img.imgurl, img.goodsid, shopcar.goods_num*goods.price as sumPrice
+  from goods
+  LEFT OUTER JOIN shopcar
+  on shopcar.goods_id = goods.gid
+  LEFT OUTER JOIN img
+  ON goods.gid = img.goodsid
+  WHERE shopcar.user_id = #{userId} and shopcar.state = 0
+    </select>
+
+    <!--根据购物车的id查询该条数据-->
+    <select id="selectByShopcarId" resultMap="myMap">
+       SELECT shopcar.*, goods.*, img.id, img.imgurl, img.goodsid, shopcar.goods_num*goods.price as sumPrice
+  from goods
+  LEFT OUTER JOIN shopcar
+  on shopcar.goods_id = goods.gid
+  LEFT OUTER JOIN img
+  ON goods.gid = img.goodsid
+  WHERE shopcar.shopcar_id = #{shopcarId} and shopcar.state = 0
+    </select>
+
+    <!--根据用户的id和商品的id更改购物车的信息-->
+    <update id="updateByGoodsIdAndUserId" >
+        UPDATE shopcar SET shopcar.goods_num = #{goodsNum}
+        where goods_id = #{goodsId} and user_id = #{userId}
+    </update>
+
+    <!--根据购物车的id进行批量的删除-->
+    <delete id="deleteByShopcarIds">
+        delete from shopcar
+        where shopcar_id in (
+        <foreach collection="array" item="id" separator=",">
+            #{id,jdbcType=INTEGER}
+        </foreach>
+        )
+    </delete>
+
+</mapper>

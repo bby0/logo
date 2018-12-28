@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.qfedu.logo.mapper.TypeMapper" >
+  <resultMap id="BaseResultMap" type="com.qfedu.logo.pojo.Type" >
+    <id column="tid" property="tid" jdbcType="INTEGER" />
+    <result column="type_name" property="typeName" jdbcType="VARCHAR" />
+    <result column="type_tdescs" property="typeTdescs" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    tid, type_name, type_tdescs
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from type
+    where tid = #{tid,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from type
+    where tid = #{tid,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.qfedu.logo.pojo.Type" >
+    insert into type (tid, type_name, type_tdescs
+      )
+    values (#{tid,jdbcType=INTEGER}, #{typeName,jdbcType=VARCHAR}, #{typeTdescs,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.qfedu.logo.pojo.Type" >
+    insert into type
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="tid != null" >
+        tid,
+      </if>
+      <if test="typeName != null" >
+        type_name,
+      </if>
+      <if test="typeTdescs != null" >
+        type_tdescs,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="tid != null" >
+        #{tid,jdbcType=INTEGER},
+      </if>
+      <if test="typeName != null" >
+        #{typeName,jdbcType=VARCHAR},
+      </if>
+      <if test="typeTdescs != null" >
+        #{typeTdescs,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.qfedu.logo.pojo.Type" >
+    update type
+    <set >
+      <if test="typeName != null" >
+        type_name = #{typeName,jdbcType=VARCHAR},
+      </if>
+      <if test="typeTdescs != null" >
+        type_tdescs = #{typeTdescs,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where tid = #{tid,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.qfedu.logo.pojo.Type" >
+    update type
+    set type_name = #{typeName,jdbcType=VARCHAR},
+      type_tdescs = #{typeTdescs,jdbcType=VARCHAR}
+    where tid = #{tid,jdbcType=INTEGER}
+  </update>
+  <select id="select" resultMap="BaseResultMap">
+
+    select * from type
+  </select>
+</mapper>
